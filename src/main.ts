@@ -6,9 +6,6 @@ var path = require('path');
 import extract from "./extract"
 
 // @ts-ignore
-import runner from "./runner"
-
-// @ts-ignore
 import DEFAULT from "./consts"
 
 import {
@@ -16,7 +13,6 @@ import {
     PluginManifest,
     MarkdownView,
     App,
-    Modal,
     Notice,
     PluginSettingTab,
     Setting,
@@ -30,7 +26,6 @@ interface RunSnippetsSettings {
 const DEFAULT_SETTINGS: RunSnippetsSettings = {
     variants: DEFAULT.variants
 }
-
 
 export default class RunSnippets extends Plugin {
     constructor(app: App, pluginManifest: PluginManifest) {
@@ -77,7 +72,7 @@ export default class RunSnippets extends Plugin {
     }
 
     get_vars() {
-        let active_view = app.workspace.getActiveViewOfType(MarkdownView);
+        let active_view = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (active_view == null) {
             return null;
         }
@@ -116,7 +111,7 @@ export default class RunSnippets extends Plugin {
                 return;
             }
 
-            function definedVariant(classList, variants) {
+            function definedVariant(classList: string | string[], variants: string) {
                 for (var key of Object.keys(variants)) {
                     if (classList.contains(`language-${key}`)) {
                         return key
@@ -153,29 +148,31 @@ export default class RunSnippets extends Plugin {
             function runCommand(command: string) {
                 const {exec} = require("child_process");
                 button.innerText = "Running";
-                exec(command, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`error: ${error.message}`);
-                        if (variant.showModal) {
-                            new Notice(error.message);
-                        }
-                        button.innerText = "error";
-                        return;
-                    }
-                    if (stderr) {
-                        console.error(`stderr: ${stderr}`);
-                        if (variant.showModal) {
-                            new Notice(stderr);
-                        }
-                        button.innerText = "error";
-                        return;
-                    }
-                    console.debug(`stdout: ${stdout}`);
-
+                exec(command, 
+                variant.options ? variant.options  : {}, 
+                (error, stdout, stderr) => {
+                  if (error) {
+                    console.error(`error: ${error.message}`);
                     if (variant.showModal) {
-                        new Notice(stdout);
+                      new Notice(error.message);
                     }
-                    button.innerText = "Run";
+                    button.innerText = "error";
+                    return;
+                  }
+                  if (stderr) {
+                    console.error(`stderr: ${stderr}`);
+                    if (variant.showModal) {
+                      new Notice(stderr);
+                    }
+                    button.innerText = "error";
+                    return;
+                  }
+                  console.debug(`stdout: ${stdout}`);
+
+                  if (variant.showModal) {
+                    new Notice(stdout);
+                  }
+                  button.innerText = "Run";
                 });
             }
 
@@ -215,35 +212,39 @@ export default class RunSnippets extends Plugin {
                 let command = apply_template(match.text, variant.template, vars)
 
                 const {exec} = require("child_process");
-                exec(command, (error, stdout, stderr) => {
+                exec(
+                  command,
+                  variant.options ? variant.options  : {}, 
+                  (error, stdout, stderr) => {
                     if (error) {
-                        console.error(`error: ${error.message}`);
-                        if (variant.appendOutputContents) {
-                            writeResult(editor, error, targetLine)
-                        }
-                        if (variant.showModal) {
-                            new Notice(error.message);
-                        }
-                        return;
+                      console.error(`error: ${error.message}`);
+                      if (variant.appendOutputContents) {
+                        writeResult(editor, error, targetLine);
+                      }
+                      if (variant.showModal) {
+                        new Notice(error.message);
+                      }
+                      return;
                     }
                     if (stderr) {
-                        console.error(`stderr: ${stderr}`);
-                        if (variant.appendOutputContents) {
-                            writeResult(editor, stderr, targetLine)
-                        }
-                        if (variant.showModal) {
-                            new Notice(stderr);
-                        }
-                        return;
+                      console.error(`stderr: ${stderr}`);
+                      if (variant.appendOutputContents) {
+                        writeResult(editor, stderr, targetLine);
+                      }
+                      if (variant.showModal) {
+                        new Notice(stderr);
+                      }
+                      return;
                     }
                     console.debug(`stdout: ${stdout}`);
                     if (variant.appendOutputContents) {
-                        writeResult(editor, stdout, targetLine)
+                      writeResult(editor, stdout, targetLine);
                     }
                     if (variant.showModal) {
-                        new Notice(stdout);
+                      new Notice(stdout);
                     }
-                });
+                  }
+                );
 
             }
         }
@@ -305,7 +306,7 @@ class RunSnippetsSettingsTab extends PluginSettingTab {
                                 return false;
                             }
                         })
-                    text.inputEl.rows = 12;
+                    text.inputEl.rows = 32;
                     text.inputEl.cols = 60;
                 }
             );
