@@ -254,7 +254,7 @@ export default class RunSnippets extends Plugin {
 function writeResult(editor, result: string, outputLine: number) {
 
     let output = `\n\`\`\`output
-${result}    
+${result ? result.trim() : result}    
 \`\`\`
 `
     editor.getDoc().replaceRange(output, {line: outputLine, ch: 0});
