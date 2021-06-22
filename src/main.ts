@@ -76,10 +76,10 @@ export default class RunSnippets extends Plugin {
         this.addRunButtons();
     }
 
-    get_vars(): Promise<String> {
+    get_vars() {
         let active_view = app.workspace.getActiveViewOfType(MarkdownView);
         if (active_view == null) {
-            throw new Error("Active view is null");
+            return null;
         }
 
         let vaultPath = this.app.vault.adapter.basePath;
@@ -102,6 +102,9 @@ export default class RunSnippets extends Plugin {
 
 
         let vars = this.get_vars();
+
+        if (!vars) return;
+        
         let variants = this.settings.variants
 
         document.querySelectorAll("pre > code").forEach(function (codeBlock) {
@@ -189,6 +192,9 @@ export default class RunSnippets extends Plugin {
      */
     runSnippet() {
         let vars = this.get_vars();
+
+        if (!vars) return;
+        
         let variants = this.settings.variants
 
         const view = this.app.workspace.activeLeaf.view;
