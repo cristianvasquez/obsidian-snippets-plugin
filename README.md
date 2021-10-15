@@ -7,7 +7,7 @@ version: 0.0.4
 
 # Run Snippets plugin
 
-This plugin allows you to run Python, Javascript snippets from inside obsidian.md
+This plugin allows you to run Python and Javascript snippets from inside obsidian.md
 
 It's intended for simple uses, like starting a service, running a program, etc. I've tested this only in Linux, and is experimental.
 
