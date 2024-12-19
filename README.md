@@ -1,11 +1,6 @@
-* * *
-
-date updated: '2020-06-22'
-version: 0.0.4
-
-* * *
-
 # Run Snippets plugin
+
+> 📌 **Note:** Looking for a more up-to-date and actively maintained plugin with similar functionality? Check out [obsidian-execute-code](https://github.com/twibiral/obsidian-execute-code).
 
 This plugin allows you to run Python, Javascript etc, snippets from inside obsidian.md
 
